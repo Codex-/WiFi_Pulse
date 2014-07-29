@@ -8,10 +8,14 @@
   # Set wlan to check
 wlan='wlan0'
 
+  #Set ifconfig path
+ifconfig='/sbin/ifconfig'
 
   # Start script
-echo "$(tput setaf 6)Beginning WiFi Pulse task $(tput sgr 0)"
-echo "Interface selected: $(tput setaf 5)$wlan $(tput sgr 0)"
+echo "Beginning WiFi Pulse Task"
+now="$(date)"
+echo "$now"
+echo "Interface selected: $wlan"
 echo
 
 
@@ -22,30 +26,30 @@ echo "Locking task to prevent duplicate execution..."
   # Wait for flock on task (fd 200) for 10 seconds
   flock -x -w 10 200 ||
 if [ "$?" != "0"]; then
-  echo "$(tput setaf 1)$(tput setab 7)ERROR$(tput sgr 0)$(tput setaf 1) Unable to lock. $(tput sgr 0)";
+  echo "ERROR: Unable to lock.";
 else
   exit 1;
 fi;
   # Backward lockdir compatibility
 echo $$>>/var/lock/.wifi_pulse.lock
   
-echo "$(tput setaf 2)Lock successful! $(tput sgr 0)"
+echo "Lock successful!"
 echo
 
   # Start WiFi check	
-echo "Performing connectivity check for $(tput setaf 5)$wlan$(tput sgr 0)..."
-if ifconfig $wlan | grep -q "inet addr:" ; then
-  echo "$(tput setaf 5)$wlan$(tput sgr 0): $(tput setaf 2)Active$(tput sgr 0). Network online."
+echo "Performing connectivity check for $wlan..."
+if $ifconfig $wlan | grep -q "inet addr:" ; then
+  echo "$wlan: Active. Network online."
 else
-  echo "$(tput setaf 5)$wlan$(tput sgr 0): $(tput setaf 1)Inactive$(tput sgr 0). Network offline. $(tput setaf 3)Attempting to reconnect... $(tput sgr 0)"
+  echo "$wlan: Inactive. Network offline. Attempting to reconnect..."
   ifdown $wlan
   sleep 10
   ifup --force $wlan | grep "inet addr"
 fi
 
 echo
-echo "$(tput setaf 5)$wlan$(tput sgr 0) connection:"
-ifconfig $wlan | grep "inet addr:"
+echo "$wlan connection:"
+$ifconfig $wlan | grep "inet addr:"
 echo
 
 ) 200>/var/lock/.myscript.exclusivelock

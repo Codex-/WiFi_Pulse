@@ -39,7 +39,7 @@ if ifconfig $wlan | grep -q "inet addr:" ; then
 else
   echo "$(tput setaf 5)$wlan$(tput sgr 0): $(tput setaf 1)Inactive$(tput sgr 0). Network offline. $(tput setaf 3)Attempting to reconnect... $(tput sgr 0)"
   ifdown $wlan
-  sleep 5
+  sleep 10
   ifup --force $wlan | grep "inet addr"
 fi
 
